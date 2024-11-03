@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juegos y Tareas</title>
+    <link rel="shortcut icon" href="favicon.ico">
+   
+    <style>
+        body { font-size: 2.5vw;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .game-container, .tasks-container {
+            background-color: #fff;
+            border: 5px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #sumNumbers {
+            font-size: 3vw;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #sumInput, #memoryInput, #taskInput {
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 80%;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: rgb(0, 140, 255);
+        }
+
+        #randomNums {
+            font-size: 3vw;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .task-item input {
+            margin-right: 10px;
+        }
+
+        .completed-task {
+            color: #4caf50; /* Verde para tareas completadas */
+        }
+
+        .incomplete-task {
+            color: #f44336; /* Rojo para tareas incompletas */
+        }
+
+ /* Media Queries */
+ @media (max-width: 600px) {
+    body { font-size: 5vw; } /* Tamaño de fuente mayor en pantallas pequeñas */
+    .game-container, .tasks-container { width: 95%; }
+    button { padding: 10px; margin-top: 15px; }
+}
+
+    </style>
+</head>
+<body>
+
+<section>
+    <div>
+        <h2  class="gn">Generador de Números Aleatorios</h2>
+        
+        <p id="resultado">00, 00, 00, 00, 00, 00</p>   
+        
+        <button class="generate" onclick="generarNumeros()">Generar Números</button>
+      
+      </div>
+      
+      
+        <script>
+          function generarNumeros() {
+            // Crea un array con los números del 0 al 45
+            let numeros = Array.from({ length: 46 }, (_, i) => i);
+      
+            // Algoritmo Fisher-Yates para mezclar los números
+            for (let i = numeros.length - 1; i > 0; i--) {
+              let j = Math.floor(Math.random() * (i + 1));
+              [numeros[i], numeros[j]] = [numeros[j], numeros[i]]; // Intercambia
+            }
+      
+            // Toma los primeros 6 números mezclados
+            let seleccion = numeros.slice(0, 6);
+      
+            // Formatea cada número a dos dígitos
+            let numerosFormateados = seleccion.map(num => num < 10 ? "0" + num : num.toString());
+      
+            // Muestra los números separados por comas
+            document.getElementById("resultado").textContent = numerosFormateados.join(", ");
+          }
+        </script>
+      
+</section>
+
+<br>
+
+
+<section>
+
+    <div class="game-container" id="sumaGame">
+        <h2>Suma</h2>
+        <div id="sumNumbers"></div>
+        <input type="text" id="sumInput" placeholder="Escribe la suma"onkeydown="checkEnter(event, 'sum')">
+        <br>
+        <button onclick="checkSum()">Verificar</button>
+        <button onclick="increaseDigits()">Aumentar Dígitos</button>
+        <button onclick="resetSumGame()">Reiniciar</button>
+    </div>
+
+</section>
+
+
+
+<section>
+
+    <div class="game-container" id="memoryGame">
+        <h2>Memoria</h2>
+        <div id="memoryNumber"></div>
+        <input type="text" id="memoryInput" placeholder="Escribe el número" onkeydown="checkEnter(event, 'memory')">
+        <br>
+        <button onclick="checkMemory()">Verificar</button>
+        <button onclick="increaseMemoryDigits()">Aumentar Dígito</button>
+        <button onclick="resetMemoryGame()">Reiniciar</button>
+    </div>
+
+</section>
+
+
+<section>
+
+    <div class="game-container" id="randomNumbersGame">
+        <h2>Números Aleatorios</h2>
+        <div id="randomNums"></div>
+        <br>
+        <button onclick="generateRandomNumbers()">Generar Nuevos Números</button>
+    </div>
+
+</section> 
+
+
+<section>
+
+    <div class="tasks-container">
+        <h2>Lista de Tareas</h2>
+        <input type="text" id="taskInput" placeholder="Escribe una tarea" onkeydown="checkEnter(event, 'task')" >
+        <button onclick="addTask()">Agregar Tarea</button>
+        <div id="taskList"></div>
+    </div>
+
+</section>
+
+
+    <script>
+        let sumDigitCount = 2;
+        let memoryDigitCount = 2;
+        let memoryDisplayedNumber = '';
+        const tasks = [];
+
+        function generateRandomNumber(max) {
+            return Math.floor(Math.random() * (max + 1));
+        }
+
+        function displaySumNumbers() {
+            document.getElementById('sumNumbers').innerHTML = `
+                <span>${generateRandomNumber(Math.pow(10, sumDigitCount) - 1)}</span><br>
+                <span>${generateRandomNumber(Math.pow(10, sumDigitCount) - 1)}</span>
+            `;
+        }
+
+        function checkSum() {
+            const sumInput = document.getElementById('sumInput').value;
+            const result = parseInt(document.getElementById('sumNumbers').querySelectorAll('span')[0].innerText) +
+                           parseInt(document.getElementById('sumNumbers').querySelectorAll('span')[1].innerText);
+
+            if (parseInt(sumInput) === result) {
+;
+                document.getElementById('sumNumbers').innerHTML = '';
+                document.getElementById('sumInput').value = '';
+                displaySumNumbers();
+            } else {
+                alert('Incorrecto. Inténtalo de nuevo.');
+            }
+        }
+
+        function increaseDigits() {
+            sumDigitCount++;
+            displaySumNumbers();
+        }
+
+        function resetSumGame() {
+            sumDigitCount = 2;
+            document.getElementById('sumNumbers').innerHTML = '';
+            document.getElementById('sumInput').value = '';
+            displaySumNumbers();
+        }
+
+        function displayMemoryNumber() {
+            memoryDisplayedNumber = generateRandomNumber(Math.pow(10, memoryDigitCount) - 1);
+            document.getElementById('memoryNumber').innerText = memoryDisplayedNumber;
+            setTimeout(() => {
+                document.getElementById('memoryNumber').innerText = '';
+            }, 1000);
+        }
+
+        function checkMemory() {
+            const memoryInput = document.getElementById('memoryInput').value;
+
+            if (memoryInput === memoryDisplayedNumber.toString()) {
+                ;
+                document.getElementById('memoryNumber').innerText = '';
+                document.getElementById('memoryInput').value = '';
+                displayMemoryNumber();
+            } else {
+                alert('Incorrecto. Inténtalo de nuevo.');
+            }
+        }
+
+        function increaseMemoryDigits() {
+            memoryDigitCount++;
+            document.getElementById('memoryNumber').innerText = '';
+            displayMemoryNumber();
+        }
+
+        function resetMemoryGame() {
+            memoryDigitCount = 2;
+            memoryDisplayedNumber = '';
+            document.getElementById('memoryNumber').innerText = '';
+            document.getElementById('memoryInput').value = '';
+            displayMemoryNumber();
+        }
+
+        function generateRandomNumbers() {
+            const uniqueNumbers = new Set();
+
+            while (uniqueNumbers.size < 6) {
+                const num = generateRandomNumber(45);
+                uniqueNumbers.add(num);
+            }
+
+            const randomNumsElement = document.getElementById('randomNums');
+            randomNumsElement.innerText = Array.from(uniqueNumbers).join(', ');
+        }
+
+        function addTask() {
+            const taskInput = document
+
+.getElementById('taskInput').value;
+            if (taskInput.trim() !== '') {
+                tasks.push({ task: taskInput, completed: false });
+                document.getElementById('taskInput').value = '';
+                displayTasks();
+            } else {
+                alert('Por favor, ingresa una tarea válida.');
+            }
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            displayTasks();
+        }
+
+        function toggleTaskStatus(index) {
+            tasks[index].completed = !tasks[index].completed;
+            displayTasks();
+        }
+
+        function checkEnter(event, game) {
+            if (event.key === 'Enter') {
+                if (game === 'sum') {
+                    checkSum();
+                } else if (game === 'memory') {
+                    checkMemory();
+                } else if (game === 'task') {
+                    addTask();
+                }
+            }
+        }
+
+
+        function displayTasks() {
+            const taskListElement = document.getElementById('taskList');
+            taskListElement.innerHTML = '';
+
+            tasks.forEach((task, index) => {
+                const taskItem = document.createElement('div');
+                taskItem.classList.add('task-item');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = task.completed;
+                checkbox.onclick = () => toggleTaskStatus(index);
+
+                const taskText = document.createElement('span');
+                taskText.innerText = task.task;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Eliminar';
+                deleteButton.onclick = () => deleteTask(index);
+
+                taskItem.appendChild(checkbox);
+                taskItem.appendChild(taskText);
+                taskItem.appendChild(deleteButton);
+
+                taskListElement.appendChild(taskItem);
+
+                if (task.completed) {
+                    taskText.classList.add('completed-task');
+                } else {
+                    taskText.classList.add('incomplete-task');
+                }
+            });
+        }
+
+        // Inicia el juego y la lista de tareas
+        displaySumNumbers();
+        displayMemoryNumber();
+        generateRandomNumbers();
+        displayTasks();
+    </script>
+</body>
+</html>
